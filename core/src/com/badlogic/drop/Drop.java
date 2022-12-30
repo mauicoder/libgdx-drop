@@ -2,6 +2,7 @@ package com.badlogic.drop;
 
 import com.badlogic.drop.screens.MainMenuScreen;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -23,8 +24,12 @@ public class Drop extends Game {
 
 	@Override
 	public void dispose() {
+		Gdx.app.log("MyTag", "disposing Game");
 		batch.dispose();
 		font.dispose();
-		screen.dispose();
+		if(screen != null ) {
+			Gdx.app.log("MyTag", "disposing the screen");
+			screen.dispose();
+		}
 	}
 }
