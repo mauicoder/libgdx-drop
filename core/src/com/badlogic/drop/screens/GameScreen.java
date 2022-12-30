@@ -100,23 +100,7 @@ public class GameScreen implements Screen {
         }
         game.batch.end();
 
-        // process user input
-        if (Gdx.input.isTouched()) {
-            Vector3 touchPos = new Vector3();
-            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            camera.unproject(touchPos);
-            bucket.x = touchPos.x - 64f / 2;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-            bucket.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-            bucket.x += 200 * Gdx.graphics.getDeltaTime();
-
-        // make sure the bucket stays within the screen bounds
-        if (bucket.x < 0)
-            bucket.x = 0;
-        if (bucket.x > 800 - 64)
-            bucket.x = 800 - 64;
+        handleInput(delta);
 
         // check if we need to create a new raindrop
         if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
@@ -128,7 +112,7 @@ public class GameScreen implements Screen {
         Iterator<Rectangle> iter = raindrops.iterator();
         while (iter.hasNext()) {
             Rectangle raindrop = iter.next();
-            raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
+            raindrop.y -= 200 * delta;
             if (raindrop.y + 64 < 0)
                 iter.remove();
             if (raindrop.overlaps(bucket)) {
@@ -137,6 +121,26 @@ public class GameScreen implements Screen {
                 iter.remove();
             }
         }
+    }
+
+    private void handleInput(float delta) {
+        // process user input
+        if (Gdx.input.isTouched()) {
+            Vector3 touchPos = new Vector3();
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+            bucket.x = touchPos.x - 64f / 2;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            bucket.x -= 200 * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            bucket.x += 200 * delta;
+
+        // make sure the bucket stays within the screen bounds
+        if (bucket.x < 0)
+            bucket.x = 0;
+        if (bucket.x > 800 - 64)
+            bucket.x = 800 - 64;
     }
 
     @Override
