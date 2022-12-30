@@ -20,15 +20,15 @@ import java.util.Iterator;
 public class GameScreen implements Screen {
     private final Drop game;
 
-    Texture dropImage;
-    Texture bucketImage;
-    Sound dropSound;
-    Music rainMusic;
-    OrthographicCamera camera;
-    Rectangle bucket;
-    Array<Rectangle> raindrops;
-    long lastDropTime;
-    int dropsGathered;
+    private final Texture dropImage;
+    private final Texture bucketImage;
+    private final Sound dropSound;
+    private final Music rainMusic;
+    private final OrthographicCamera camera;
+    private final Rectangle bucket;
+    private final Array<Rectangle> raindrops;
+    private long lastDropTime;
+    private int dropsGathered;
 
     public GameScreen(Drop game) {
         this.game = game;
