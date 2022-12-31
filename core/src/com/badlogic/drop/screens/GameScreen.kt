@@ -1,6 +1,7 @@
 package com.badlogic.drop.screens
 
 import com.badlogic.drop.Drop
+import com.badlogic.drop.tools.PreferencesTool
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.audio.Music
@@ -24,6 +25,8 @@ class GameScreen(private val game: Drop) : Screen {
     private val camera: OrthographicCamera
     private val bucket: Rectangle
     private val raindrops: Array<Rectangle>
+    private var lives : Int = 3
+    private val highScore : Int = PreferencesTool.getHighScore()
 
     // Rectangle pool.
     private val raindropsPool = Pools.get(Rectangle::class.java)
@@ -89,7 +92,7 @@ class GameScreen(private val game: Drop) : Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch!!.begin()
-        game.font!!.draw(game.batch, "Drops Collected: $dropsGathered", 0f, 480f)
+        game.font!!.draw(game.batch, "Drops Collected: $dropsGathered, Lives: $lives, High Score: $highScore", 1f, 480f)
         game.batch!!.draw(bucketImage, bucket.x, bucket.y, bucket.width, bucket.height)
         for (raindrop in raindrops) {
             game.batch!!.draw(dropImage, raindrop.getX(), raindrop.getY())
@@ -107,13 +110,21 @@ class GameScreen(private val game: Drop) : Screen {
         while (iter.hasNext()) {
             val raindrop = iter.next()
             raindrop.y -= 200 * delta
-            if (raindrop.y + 64 < 0) iter.remove()
+            if (raindrop.y + 64 < 0) {
+                iter.remove()
+                lives -=1
+            }
             if (raindrop.overlaps(bucket)) {
                 dropsGathered++
                 dropSound.play()
                 iter.remove()
                 raindropsPool.free(raindrop)
             }
+        }
+        if (lives <= 0) {
+            //game over
+            game.screen = EndGameScreen(game, dropsGathered)
+            dispose()
         }
     }
 
