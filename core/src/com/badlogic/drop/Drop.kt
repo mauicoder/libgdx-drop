@@ -7,14 +7,18 @@ import com.badlogic.drop.screens.MainMenuScreen
 import com.badlogic.gdx.Gdx
 
 class Drop : Game() {
+    val V_WIDTH = 800f
+    val V_HEIGHT = 480f
+
     @JvmField
 	var batch: SpriteBatch? = null
     @JvmField
 	var font: BitmapFont? = null
+
     override fun create() {
         batch = SpriteBatch()
         font = BitmapFont() // use libGDX's default Arial font
-        setScreen(MainMenuScreen(this))
+        screen = MainMenuScreen(this)
     }
 
     override fun dispose() {

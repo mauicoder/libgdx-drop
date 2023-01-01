@@ -16,13 +16,18 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.TimeUtils
+import com.badlogic.gdx.utils.viewport.ExtendViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 
 class GameScreen(private val game: Drop) : Screen {
+    private val DROP_WIDTH = 64
+    private val DROP_HEIGHT = 51
     private val dropImage: Texture = Texture(Gdx.files.internal("droplet.png"))
     private val bucketImage: Texture = Texture(Gdx.files.internal("bucket.png"))
     private val dropSound: Sound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"))
     private val rainMusic: Music = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"))
-    private val camera: OrthographicCamera
+    private val camera: OrthographicCamera = OrthographicCamera()
+    private var viewPort : Viewport = ExtendViewport(game.V_WIDTH, game.V_HEIGHT , camera)
     private val bucket: Rectangle
     private val raindrops: Array<Rectangle>
     private var lives : Int = 3
@@ -35,20 +40,20 @@ class GameScreen(private val game: Drop) : Screen {
 
     init {
 
+        viewPort.apply(true)
         // load the drop sound effect and the rain background "music"
         rainMusic.isLooping = true
 
         // create the camera and the SpriteBatch
-        camera = OrthographicCamera()
-        camera.setToOrtho(false, 800f, 480f)
+        game.batch!!.projectionMatrix = camera.combined
 
         // create a Rectangle to logically represent the bucket
         bucket = Rectangle()
-        bucket.x = 800f / 2 - 64f / 2 // center the bucket horizontally
+        bucket.x = viewPort.worldWidth / 2 - DROP_WIDTH / 2 // center the bucket horizontally
         bucket.y = 20f // bottom left corner of the bucket is 20 pixels above
         // the bottom screen edge
-        bucket.width = 64f
-        bucket.height = 64f
+        bucket.width = DROP_WIDTH.toFloat()
+        bucket.height = DROP_HEIGHT.toFloat()
 
         // create the raindrops array and spawn the first raindrop
         raindrops = Array()
@@ -63,10 +68,12 @@ class GameScreen(private val game: Drop) : Screen {
     }
 
     private fun initRaindrop(raindrop: Rectangle) {
-        raindrop.x = MathUtils.random(0, 800 - 64).toFloat()
-        raindrop.y = 480f
-        raindrop.width = 64f
-        raindrop.height = 64f
+        raindrop.x = MathUtils.random(0, game.V_WIDTH.toInt()-DROP_WIDTH).toFloat()
+        raindrop.y = game.V_HEIGHT
+        raindrop.width = DROP_WIDTH.toFloat()
+        raindrop.height = DROP_HEIGHT.toFloat()
+        //Gdx.app.log("MyTag", "Drop spawned at x: ${raindrop.x}, y: ${raindrop.y}")
+
     }
 
     override fun show() {
@@ -92,7 +99,7 @@ class GameScreen(private val game: Drop) : Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch!!.begin()
-        game.font!!.draw(game.batch, "Drops Collected: $dropsGathered, Lives: $lives, High Score: $highScore", 1f, 480f)
+        game.font!!.draw(game.batch, "Drops Collected: $dropsGathered, Lives: $lives, High Score: $highScore", 25f, game.V_HEIGHT)
         game.batch!!.draw(bucketImage, bucket.x, bucket.y, bucket.width, bucket.height)
         for (raindrop in raindrops) {
             game.batch!!.draw(dropImage, raindrop.getX(), raindrop.getY())
@@ -110,7 +117,7 @@ class GameScreen(private val game: Drop) : Screen {
         while (iter.hasNext()) {
             val raindrop = iter.next()
             raindrop.y -= 200 * delta
-            if (raindrop.y + 64 < 0) {
+            if (raindrop.y + DROP_HEIGHT < 0) {
                 iter.remove()
                 lives -=1
             }
@@ -134,22 +141,20 @@ class GameScreen(private val game: Drop) : Screen {
             val touchPos = Vector3()
             touchPos[Gdx.input.x.toFloat(), Gdx.input.y.toFloat()] = 0f
             camera.unproject(touchPos)
-            bucket.x = touchPos.x - 64f / 2
+            bucket.x = touchPos.x - DROP_WIDTH / 2
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) bucket.x -= 200 * delta
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) bucket.x += 200 * delta
 
         // make sure the bucket stays within the screen bounds
         if (bucket.x < 0) bucket.x = 0f
-        if (bucket.x > 800 - 64) bucket.x = (800 - 64).toFloat()
+        if (bucket.x > viewPort.worldWidth - DROP_WIDTH) bucket.x = (viewPort.worldWidth - DROP_WIDTH)
     }
 
-    override fun resize(width: Int, height: Int) {}
+    override fun resize(width: Int, height: Int) = viewPort.update(width, height, true)
     override fun pause() {}
     override fun resume() {}
-    override fun hide() {
-        //dispose();
-    }
+    override fun hide() {}
 
     override fun dispose() {
         Gdx.app.log("MyTag", "Disposing GameScreen")

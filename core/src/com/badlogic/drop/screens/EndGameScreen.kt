@@ -6,13 +6,16 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.utils.viewport.FitViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 
 class EndGameScreen(private val game: Drop, private val score: Int) : Screen {
-    private var camera: OrthographicCamera = OrthographicCamera()
+    private val camera: OrthographicCamera = OrthographicCamera()
+    private var viewPort : Viewport = FitViewport(game.V_WIDTH, game.V_HEIGHT , camera)
     private val highScore = PreferencesTool.getHighScore()
 
     init {
-        camera.setToOrtho(false, 800f, 480f)
+        viewPort.apply(true)
         if (score > highScore) PreferencesTool.saveHighScore(score)
     }
 
@@ -39,8 +42,7 @@ class EndGameScreen(private val game: Drop, private val score: Int) : Screen {
         }
     }
 
-    override fun resize(width: Int, height: Int) {
-    }
+    override fun resize(width: Int, height: Int) = viewPort.update(width, height, true)
 
     override fun pause() {
     }
