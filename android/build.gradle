@@ -1,6 +1,9 @@
 android {
     buildToolsVersion "33.0.1"
     compileSdkVersion 32
+    kotlin {
+        jvmToolchain(8)
+    }
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -37,7 +40,6 @@ android {
         aidl true
     }
 }
-
 
 // called every time gradle gets executed, takes the native dependencies of
 // the natives configuration, and extracts them to the proper libs/ folders
